@@ -5,7 +5,11 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { repos } from "./data";
 
+import { createVehicle } from "./Vehicle";
+import { plots } from "./driving";
+import type { Drive } from "./DriveControls";
 type Props = {
+  drive: Drive;
   selected: number;
   onSelect: (id: number) => void;
   resetKey: number;
@@ -90,6 +94,7 @@ function createWorld(
   host: HTMLDivElement,
   pick: (id: number) => void,
   fail: () => void,
+  readDrive: () => Drive,
 ) {
   const scene = new THREE.Scene();
   const renderer = new THREE.WebGLRenderer({
@@ -197,12 +202,9 @@ function createWorld(
     );
   };
   repos.slice(0, 25).forEach((repo, index) => {
-    const plot =
-      ((Math.floor(index / 5) + 2) % 5) * 5 + (((index % 5) + 2) % 5);
-    const gx = (plot % 5) - 2,
-      gz = Math.floor(plot / 5) - 2;
-    const x = gx * step,
-      z = gz * step;
+    const { x, z } = plots[index],
+      gx = x / step,
+      gz = z / step;
     const rand = seeded(repo.id * 3103);
     const palette = (index * 5 + Math.floor(index / 5)) % 6,
       accent = repo.color;
@@ -428,6 +430,7 @@ function createWorld(
     pointer = new THREE.Vector2(),
     start = new THREE.Vector2();
   const hit = (e: PointerEvent) => {
+    if (vehicle.active) return undefined;
     const rect = canvas.getBoundingClientRect();
     pointer.set(
       ((e.clientX - rect.left) / rect.width) * 2 - 1,
@@ -460,12 +463,15 @@ function createWorld(
     fail();
   };
   canvas.addEventListener("webglcontextlost", lost);
+  const vehicle = createVehicle(scene);
   const resize = () => {
     const w = host.clientWidth,
       h = host.clientHeight;
     if (!w || !h) return;
     const aspect = w / h,
       half = Math.max(26, 40 / aspect);
+    vehicle.camera.aspect = aspect;
+    vehicle.camera.updateProjectionMatrix();
     camera.left = -half * aspect;
     camera.right = half * aspect;
     camera.top = half;
@@ -485,15 +491,50 @@ function createWorld(
   });
   visibility.observe(host);
   let frame = 0;
+  let prev = performance.now(),
+    quality = false,
+    sequence = 0;
   const render = () => {
-    controls.update();
+    const now = performance.now(),
+      dt = Math.min(0.12, (now - prev) / 1000);
+    prev = now;
+    const drive = readDrive();
+    if (quality !== drive.low) {
+      quality = drive.low;
+      renderer.setPixelRatio(
+        quality ? 0.75 : Math.min(window.devicePixelRatio, 1.65),
+      );
+      resize();
+    }
+    if (vehicle.active !== drive.active) {
+      vehicle.enable(drive.active);
+      controls.enabled = !drive.active;
+      if (!drive.active) reset();
+      invalidate();
+    }
+    if (drive.destination.seq !== sequence) {
+      sequence = drive.destination.seq;
+      vehicle.park(drive.destination.id);
+    }
+    if (!drive.active) controls.update();
     if (visible && !document.hidden) {
+      if (drive.active) {
+        vehicle.tick(
+          dt,
+          drive.input.current,
+          drive.view,
+          drive.lights,
+          drive.paused,
+          drive.report,
+        );
+        invalidate();
+      }
       if (!reduced && marker.visible) {
         markerTip.rotation.y = performance.now() * 0.00065;
         invalidate();
       }
       if (dirty) {
-        renderer.render(scene, camera);
+        renderer.render(scene, vehicle.active ? vehicle.camera : camera);
         dirty = false;
       }
     }
@@ -549,6 +590,7 @@ function createWorld(
 }
 
 export default function City({
+  drive,
   selected,
   onSelect,
   resetKey,
@@ -558,6 +600,10 @@ export default function City({
 }: Props) {
   const host = useRef<HTMLDivElement>(null),
     engine = useRef<Engine | null>(null);
+  const session = useRef(drive);
+  useEffect(() => {
+    session.current = drive;
+  }, [drive]);
   const callbacks = useRef({ onSelect, onError, onReady, selected });
   useEffect(() => {
     callbacks.current = { onSelect, onError, onReady, selected };
@@ -569,6 +615,7 @@ export default function City({
         host.current,
         (id) => callbacks.current.onSelect(id),
         () => callbacks.current.onError(),
+        () => session.current,
       );
       engine.current = world;
       world.select(callbacks.current.selected);

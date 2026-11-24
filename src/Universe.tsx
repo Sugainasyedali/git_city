@@ -27,6 +27,7 @@ import {
   GitBranch,
   Menu,
 } from "lucide-react";
+import { DriveControls, useDriving } from "./DriveControls";
 import City from "./City";
 import { repos, districtCount } from "./data";
 type Mode = "home" | "demo" | "docs";
@@ -89,6 +90,7 @@ export default function Universe({ mode }: { mode: Mode }) {
     select(id);
     showList(false);
   };
+  const drive = useDriving(list || !!repo, pick);
   const nav = (
     <>
       <Link className={mode === "home" ? "active" : ""} href="/">
@@ -144,6 +146,13 @@ export default function Universe({ mode }: { mode: Mode }) {
               Drag to orbit, pinch or scroll to zoom, and select a building to
               inspect its repository. Use the directory for keyboard navigation.
               Escape closes panels.
+            </p>
+            <h2>Drive the streets</h2>
+            <p>
+              Choose Drive city in the explorer. Use WASD or the on-screen
+              controls to drive, Space to brake and Shift to boost. E opens a
+              nearby repository. M opens the teleport map, C switches camera, F
+              toggles headlights and R resets the vehicle.
             </p>
             <h2>Read the skyline</h2>
             <p>
@@ -212,8 +221,12 @@ export default function Universe({ mode }: { mode: Mode }) {
                 className={"panel " + (expanded ? "expanded" : "")}
                 ref={panel}
               >
+                {mode === "demo" && ready && !failed && (
+                  <DriveControls d={drive} blocked={list || !!repo} />
+                )}
                 <div className="scene">
                   <City
+                    drive={drive}
                     selected={selected}
                     onSelect={pick}
                     resetKey={reset}
@@ -222,9 +235,11 @@ export default function Universe({ mode }: { mode: Mode }) {
                     onError={() => setFailed(true)}
                   />
                 </div>
-                <div className="hud">
-                  <span className="cross">⌖</span> ORBIT VIEW
-                </div>
+                {!drive.active && (
+                  <div className="hud">
+                    <span className="cross">⌖</span> ORBIT VIEW
+                  </div>
+                )}
                 <button
                   className="directory"
                   onClick={() => showList(!list)}
@@ -246,11 +261,15 @@ export default function Universe({ mode }: { mode: Mode }) {
                     </button>
                   </div>
                 )}
-                <div className="compass" aria-hidden="true">
-                  <b>N</b>
-                  <Compass size={29} />
-                </div>
-                <div className="tools">
+                {!drive.active && (
+                  <div className="compass" aria-hidden="true">
+                    <b>N</b>
+                    <Compass size={29} />
+                  </div>
+                )}
+                <div
+                  className={"tools " + (drive.active ? "drivingtools" : "")}
+                >
                   <button
                     aria-label="Zoom in"
                     onClick={() => setZoom((v) => v + 1)}
@@ -332,6 +351,11 @@ export default function Universe({ mode }: { mode: Mode }) {
                         <X />
                       </button>
                     </div>
+                    {mode === "demo" && ready && !failed && (
+                      <button onClick={() => drive.move(repo.id)}>
+                        Drive here
+                      </button>
+                    )}
                     <span className="owner">{repo.owner} /</span>
                     <h3>{repo.name}</h3>
                     <p>{repo.description}</p>
@@ -369,7 +393,9 @@ export default function Universe({ mode }: { mode: Mode }) {
                 </div>
                 <div className="hint">
                   <MousePointer2 />
-                  Drag to orbit · Scroll to zoom
+                  {drive.active
+                    ? "WASD drive · Space brake · M map"
+                    : "Drag to orbit · Scroll to zoom"}
                 </div>
               </div>
             </section>

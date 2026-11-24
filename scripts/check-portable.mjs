@@ -54,6 +54,54 @@ try {
   }
   assert.equal(await page.locator(".inspector").count(), 1);
   await page.screenshot({ path: "docs/images/explorer.png" });
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Drive city" }).click();
+  await page.keyboard.down("w");
+  await page.waitForFunction(
+    () =>
+      document.querySelector(".instruments strong")?.textContent &&
+      parseInt(document.querySelector(".instruments strong").textContent) > 0,
+  );
+  await page.keyboard.up("w");
+  await page.keyboard.press("f");
+  assert.equal(
+    await page
+      .getByRole("button", { name: "Headlights", exact: true })
+      .getAttribute("aria-pressed"),
+    "false",
+  );
+  await page.keyboard.press("c");
+  assert.match(
+    await page
+      .getByRole("button", { name: "Change driving camera" })
+      .innerText(),
+    /Overhead/,
+  );
+  await page.keyboard.press("m");
+  await page
+    .locator(".mapgrid")
+    .getByRole("button", { name: "oxide-cache", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Inspect oxide-cache · E" }).waitFor();
+  await page.keyboard.press("e");
+  assert.match(await page.locator(".inspector").innerText(), /oxide-cache/);
+  await page.getByRole("button", { name: "Drive here" }).click();
+  await page.keyboard.press("c");
+  await page.getByRole("button", { name: "Reset vehicle" }).click();
+  await page.getByLabel("Graphics quality").selectOption("low");
+  await page.screenshot({ path: "docs/images/driving.png" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  const pedal = await page
+    .getByRole("button", { name: "Accelerate", exact: true })
+    .boundingBox();
+  await page.mouse.move(pedal.x + pedal.width / 2, pedal.y + pedal.height / 2);
+  await page.mouse.down();
+  await page.waitForFunction(
+    () =>
+      parseInt(document.querySelector(".instruments strong").textContent) > 0,
+  );
+  await page.mouse.up();
+  await page.getByRole("button", { name: "Exit vehicle" }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.evaluate(() => {
     location.hash = "/";

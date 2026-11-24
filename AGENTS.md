@@ -19,3 +19,5 @@ Never expose GitHub credentials to the browser. Use immutable provider IDs and c
 ## Commands and completion
 
 Use Node 24 and npm. Run npm ci, npm run dev and open the URL printed by Next. Before delivery run npm run typecheck, npm run lint, npm test and npm run build. Review the actual render for graphics or interaction changes. Update documentation, acceptance evidence and limitations for the affected milestone. A feature needs implementation, working normal and failure paths, authorization review where relevant, relevant tests and a recorded verification result.
+
+Keep plot placement, road clearance and parking calculations in src/driving.ts. Update the vehicle simulation tests when changing city spacing or vehicle dimensions.

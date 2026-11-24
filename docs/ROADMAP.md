@@ -12,4 +12,4 @@
 | 7 · Public release | Performance profiling, accessibility, sharing, deployment and release automation | Production, privacy and end-to-end release checks pass |
 | 8 · Extensions | Interiors, history playback, dependency views, missions, organizations and optional AI or multiplayer | Separate product and threat review per feature |
 
-Current delivery scope ends at the Phase 1 foundation. See the development report for verified coverage and unresolved checks.
+The current delivery includes Phase 2 driving in Repository City. See the development report for verified coverage and unresolved checks.

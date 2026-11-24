@@ -20,3 +20,5 @@ Next's installation guide sets Node 20.9 as the minimum for modern App Router ve
 ## Resolved foundation stack
 
 The installed lockfile resolves Next.js 16.4.6, React and React DOM 19.3.1, Three.js 0.187.0, TypeScript 5.9.3 and ESLint 9.39.5. The installed Next package declares React and React DOM ^19.0.0 among accepted peer ranges. npm ls --depth=0 completed successfully under Node 24.22.3. Using Three.js directly keeps the orbit, picking and resource lifecycle in one browser module. The static export keeps the entire demonstration independent of application servers after compilation.
+
+Phase 2 shares plot coordinates between the deterministic driving simulation, renderer and minimap. Three.js owns the live vehicle and chase camera. React owns drive mode, overlay state and sampled telemetry. No network service or new runtime dependency is needed.

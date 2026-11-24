@@ -656,3 +656,134 @@ footer span {
     gap: 10px;
   }
 }
+.drivebar,
+.instruments,
+.driveactions,
+.driveDialog {
+  position: absolute;
+  z-index: 2;
+  background: #0d1624ed;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+}
+.drivebar {
+  left: 12px;
+  top: 51px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 4px;
+  flex-wrap: wrap;
+  max-width: calc(100% - 24px);
+}
+.drivebar button,
+.drivebar label,
+.driveHUD button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  font-size: 12px;
+}
+.drivebar label {
+  color: var(--muted);
+}
+.drivebar select {
+  color: inherit;
+  background: var(--panel);
+  border: 0;
+}
+.drivebar button:first-child {
+  color: var(--cyan);
+}
+.drivebar:has(button[aria-label="Headlights"]) {
+  top: 12px;
+  max-width: calc(100% - 125px);
+}
+.instruments {
+  bottom: 12px;
+  left: 12px;
+  padding: 7px;
+  display: grid;
+  justify-items: center;
+  font-family: var(--mono);
+  gap: 3px;
+}
+.minimap {
+  width: 85px;
+  height: 85px;
+  background: #122231;
+}
+.instruments small {
+  font-size: 11px;
+}
+.instruments strong {
+  font-size: 15px;
+}
+.driveactions {
+  bottom: 12px;
+  left: 125px;
+  padding: 4px;
+}
+.pedals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.pedals button {
+  touch-action: none;
+  user-select: none;
+}
+.driveDialog {
+  inset: 20% 12% auto;
+  max-height: 68%;
+  padding: 14px;
+  overflow: auto;
+  box-shadow: 0 10px 35px #000;
+}
+.mapgrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 3px;
+  margin: 10px 0;
+}
+.mapgrid button {
+  word-break: break-word;
+}
+.drivingtools button:not(:last-child) {
+  display: none;
+}
+.inspector > button {
+  display: block;
+  margin: 4px 0 12px;
+}
+@media (max-width: 700px) {
+  .minimap {
+    width: 58px;
+    height: 58px;
+  }
+  .driveactions {
+    left: 98px;
+    right: 56px;
+  }
+  .driveDialog {
+    inset: 25% 3% auto;
+  }
+  .drivebar label {
+    font-size: 11px;
+  }
+  .mapgrid button {
+    font-size: 10px;
+    padding: 4px;
+  }
+  .drivebar button {
+    padding: 4px;
+  }
+  .driveHUD .pedals button {
+    min-height: 35px;
+  }
+  .driveactions button {
+    font-size: 11px;
+  }
+}
